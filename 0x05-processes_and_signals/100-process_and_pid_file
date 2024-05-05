@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# Create the PID file and store the PID
+echo $$ > /var/run/myscript.pid
+
+# Function to handle signals
+handle_signal() {
+    case $1 in
+        SIGTERM)
+            echo "I hate the kill command"
+            ;;
+        SIGINT)
+            echo "Y U no love me?!"
+            ;;
+        SIGQUIT|SIGTERM)
+            rm /var/run/myscript.pid
+            exit 0
+            ;;
+    esac
+}
+
+# Set signal traps
+trap 'handle_signal SIGTERM' SIGTERM
+trap 'handle_signal SIGINT' SIGINT
+trap 'handle_signal SIGQUIT' SIGQUIT
+
+# Display "To infinity and beyond" indefinitely
+while true; do
+    echo "To infinity and beyond"
+    sleep 1
+done

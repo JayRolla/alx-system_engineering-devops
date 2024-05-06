@@ -1,34 +1,50 @@
 #!/usr/bin/env bash
-# This script manages the manage_my_process script
+# Script to manage the my_process service (start, stop, restart)
+
+PID_FILE="/var/run/my_process.pid"
+LOG_FILE="/tmp/my_process"
+PROCESS_SCRIPT="./manage_my_process"
+
+function start_process {
+    if [ -f "$PID_FILE" ]; then
+        echo "manage_my_process is already running."
+        exit 1
+    fi
+    nohup $PROCESS_SCRIPT > $LOG_FILE 2>&1 &
+    echo $! > "$PID_FILE"
+    echo "manage_my_process started"
+}
+
+function stop_process {
+    if [ ! -f "$PID_FILE" ]; then
+        echo "manage_my_process is not running."
+        exit 1
+    fi
+    kill $(cat "$PID_FILE")
+    rm -f "$PID_FILE"
+    echo "manage_my_process stopped"
+}
+
+function restart_process {
+    echo "Restarting manage_my_process..."
+    stop_process
+    start_process
+    echo "manage_my_process restarted"
+}
 
 case "$1" in
     start)
-        manage_my_process_pid=$(pgrep -f "manage_my_process")
-        if [ -z "$manage_my_process_pid" ]; then
-            ./manage_my_process &
-            manage_my_process_pid=$!
-            echo "$manage_my_process_pid" > /var/run/my_process.pid
-            echo "manage_my_process started"
-        else
-            echo "manage_my_process is already running"
-        fi
+        start_process
         ;;
     stop)
-        manage_my_process_pid=$(cat /var/run/my_process.pid)
-        if [ -n "$manage_my_process_pid" ]; then
-            kill "$manage_my_process_pid"
-            rm /var/run/my_process.pid
-            echo "manage_my_process stopped"
-        else
-            echo "manage_my_process is not running"
-        fi
+        stop_process
         ;;
     restart)
-        $0 stop
-        $0 start
-        echo "manage_my_process restarted"
+        restart_process
         ;;
     *)
         echo "Usage: $0 {start|stop|restart}"
+        exit 1
         ;;
 esac
+

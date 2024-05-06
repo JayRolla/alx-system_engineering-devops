@@ -1,23 +1,14 @@
 #!/usr/bin/env bash
-# This script displays numbers from 1 to 100
-# and prints 'FizzBuzz' for multiples of 3 and 5,
-# 'Fizz' for multiples of 3, and 'Buzz' for multiples of 5.
+# This script creates an RSA SSH key pair and saves the public key to a file.
 
-for ((i=1; i<=100; i++))
-do
-    output=""
-    if ((i % 3 == 0))
-    then
-        output+="Fizz"
-    fi
-    if ((i % 5 == 0))
-    then
-        output+="Buzz"
-    fi
-    if [ -z "$output" ]
-    then
-        echo "$i"
-    else
-        echo "$output"
-    fi
-done
+# Generating the SSH key pair
+ssh-keygen -t rsa -b 4096 -f "$HOME/.ssh/id_rsa" -N ""
+
+# Ensuring the .ssh directory exists and has the correct permissions
+mkdir -p "$HOME/.ssh"
+chmod 700 "$HOME/.ssh"
+
+# Outputting the public key to the specified file
+cat "$HOME/.ssh/id_rsa.pub" > 0-RSA_public_key.pub
+
+echo "RSA key pair created. Public key saved to 0-RSA_public_key.pub."

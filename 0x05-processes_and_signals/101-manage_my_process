@@ -1,27 +1,34 @@
 #!/usr/bin/env bash
-# Script to start, stop, or restart manage_my_process.
+# This script manages the manage_my_process script
 
-PID_FILE="/var/run/my_process.pid"
-PROCESS_FILE="./manage_my_process"
-LOG_FILE="/tmp/my_process"
-
-case $1 in
+case "$1" in
     start)
-        nohup $PROCESS_FILE > /dev/null 2>&1 &
-        echo $! > "$PID_FILE"
-        echo "manage_my_process started"
+        manage_my_process_pid=$(pgrep -f "manage_my_process")
+        if [ -z "$manage_my_process_pid" ]; then
+            ./manage_my_process &
+            manage_my_process_pid=$!
+            echo "$manage_my_process_pid" > /var/run/my_process.pid
+            echo "manage_my_process started"
+        else
+            echo "manage_my_process is already running"
+        fi
         ;;
     stop)
-        [ -f "$PID_FILE" ] && kill $(cat "$PID_FILE") && rm -f "$PID_FILE"
-        echo "manage_my_process stopped"
+        manage_my_process_pid=$(cat /var/run/my_process.pid)
+        if [ -n "$manage_my_process_pid" ]; then
+            kill "$manage_my_process_pid"
+            rm /var/run/my_process.pid
+            echo "manage_my_process stopped"
+        else
+            echo "manage_my_process is not running"
+        fi
         ;;
     restart)
-        [ -f "$PID_FILE" ] && kill $(cat "$PID_FILE") && rm -f "$PID_FILE"
-        nohup $PROCESS_FILE > /dev/null 2>&1 &
-        echo $! > "$PID_FILE"
+        $0 stop
+        $0 start
         echo "manage_my_process restarted"
         ;;
     *)
-        echo "Usage: manage_my_process {start|stop|restart}"
+        echo "Usage: $0 {start|stop|restart}"
         ;;
 esac

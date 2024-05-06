@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
-# This script creates an RSA SSH key pair and saves the public key to a file.
+# This script generates an RSA SSH key pair and saves the public key to a file.
 
-# Generating the SSH key pair
+# Set the file name for the public key
+public_key_file="0-RSA_public_key.pub"
+
+# Generate the SSH key pair with no passphrase (-N "")
 ssh-keygen -t rsa -b 4096 -f "$HOME/.ssh/id_rsa" -N ""
 
-# Ensuring the .ssh directory exists and has the correct permissions
+# Ensure the .ssh directory exists and set the correct permissions
 mkdir -p "$HOME/.ssh"
 chmod 700 "$HOME/.ssh"
 
-# Outputting the public key to the specified file
-cat "$HOME/.ssh/id_rsa.pub" > 0-RSA_public_key.pub
+# Output the public key to the specified file
+cat "$HOME/.ssh/id_rsa.pub" > "$public_key_file"
 
-echo "RSA key pair created. Public key saved to 0-RSA_public_key.pub."
+# Adding a newline to the end of the public key file to comply with requirements
+echo "" >> "$public_key_file"

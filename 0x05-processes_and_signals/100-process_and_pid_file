@@ -1,32 +1,14 @@
 #!/usr/bin/env bash
+# This script creates a file containing its PID and reacts to SIGINT, SIGTERM, and SIGQUIT.
 
-# Create the PID file and store the PID
-echo $$ > /var/run/myscript.pid
+PID_FILE="/var/run/myscript.pid"
+echo $$ > "$PID_FILE"
+echo "PID file created at $PID_FILE"
 
-# Function to handle signals
-handle_signal() {
-    case $1 in
-        SIGTERM)
-            echo "I hate the kill command"
-            ;;
-        SIGINT)
-            echo "Y U no love me?!"
-            ;;
-        SIGQUIT|SIGTERM)
-            if [[ -f /var/run/myscript.pid ]]; then
-                rm /var/run/myscript.pid
-            fi
-            exit 0
-            ;;
-    esac
-}
+trap 'echo "I hate the kill command"; rm -f "$PID_FILE"; exit' SIGTERM
+trap 'echo "Y U no love me?!"' SIGINT
+trap 'rm -f "$PID_FILE"; echo "Process terminated."; exit' SIGQUIT
 
-# Set signal traps
-trap 'handle_signal SIGTERM' SIGTERM
-trap 'handle_signal SIGINT' SIGINT
-trap 'handle_signal SIGQUIT' SIGQUIT
-
-# Display "To infinity and beyond" indefinitely
 while true; do
     echo "To infinity and beyond"
     sleep 1
